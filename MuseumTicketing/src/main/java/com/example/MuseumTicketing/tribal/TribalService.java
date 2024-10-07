@@ -22,14 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -135,61 +135,110 @@ public class TribalService {
         return new TribalVideoDto(fileName,fileUrl,commonId,malId,engId);
     }
 
-    public ResponseEntity<List<CombinedTribalData>> getMalayalamDetails(String commonId, String malId) {
-        List<CombinedTribalData>combinedTribalDataList=new ArrayList<>();
-        List<TribalMalayalam>tribalMalayalamOptional=tribalMalayalamRepo.findBytribMalUid(malId);
-        if (!tribalMalayalamOptional.isEmpty()){
-            for (TribalMalayalam tribalMalayalam : tribalMalayalamOptional){
-                CombinedTribalData combinedTribalData =new CombinedTribalData();
-                combinedTribalData.setTitle(tribalMalayalam.getTitle());
-                combinedTribalData.setDescription(tribalMalayalam.getDescription());
-                combinedTribalData.setUniqueId(tribalMalayalam.getTribMalUid());
-
-                Optional<TribalCommonId>tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
-                if (tribalCommonIdOptional.isPresent()){
-                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
-                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
-                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
-                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
-                }
-
-                List<TribalVideo>tribalVideoList=tribalVideoRepo.findBycommonId(commonId);
-                if (!tribalVideoList.isEmpty()){
-                    tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
-                    combinedTribalData.setTribalVideoList(tribalVideoList);
-                }
-                combinedTribalDataList.add(combinedTribalData);
-            }
-        }
-        return new ResponseEntity<>(combinedTribalDataList,HttpStatus.OK);
+    public ResponseEntity<StreamingResponseBody> getMalayalamDetails(String commonId, String malId) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new StreamingResponseBody() {
+                    @Override
+                    public void writeTo(OutputStream outputStream) throws IOException {
+                        List<TribalMalayalam> tribalMalayalamList =tribalMalayalamRepo.findBytribMalUid(malId);
+                        if (!tribalMalayalamList.isEmpty()){
+                            for (TribalMalayalam tribalMalayalam : tribalMalayalamList){
+                                CombinedTribalData combinedTribalData = new CombinedTribalData();
+                                combinedTribalData.setTitle(tribalMalayalam.getTitle());
+                                combinedTribalData.setDescription(tribalMalayalam.getDescription());
+                                combinedTribalData.setUniqueId(tribalMalayalam.getTribMalUid());
+                                Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
+                                if (tribalCommonIdOptional.isPresent()){
+                                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
+                                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
+                                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
+                                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
+                                }
+                                List<TribalVideo> tribalVideoList = tribalVideoRepo.findBycommonId(commonId);
+                                tribalVideoList.sort(Comparator.comparing(TribalVideo ::getId));
+                                if (!tribalVideoList.isEmpty()){
+                                    for (TribalVideo tribalVideo : tribalVideoList){
+                                        File file = new File(tribalVideo.getFileName());
+                                        FileInputStream fileInputStream = new FileInputStream(file);
+                                        byte[] buffer = new byte[1024];
+                                        int bytesRead;
+                                        while ((bytesRead = fileInputStream.read(buffer))!=-1){
+                                            outputStream.write(buffer,0,bytesRead);
+                                        }
+                                        fileInputStream.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
-    public ResponseEntity<List<CombinedTribalData>> getEnglishDetails(String commonId, String engId) {
-        List<CombinedTribalData>combinedTribalDataList=new ArrayList<>();
-        List<TribalEnglish>tribalEnglishOptional=tribalEnglishRepo.findBytribEngUid(engId);
-        if (!tribalEnglishOptional.isEmpty()){
-            for (TribalEnglish tribalEnglish:tribalEnglishOptional){
-                CombinedTribalData combinedTribalData =new CombinedTribalData();
-                combinedTribalData.setTitle(tribalEnglish.getTitle());
-                combinedTribalData.setDescription(tribalEnglish.getDescription());
-                combinedTribalData.setUniqueId(tribalEnglish.getTribEngUid());
-                Optional<TribalCommonId>tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
-                if (tribalCommonIdOptional.isPresent()){
-                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
-                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
-                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
-                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
-                }
-                List<TribalVideo>tribalVideoList=tribalVideoRepo.findBycommonId(commonId);
-                if (!tribalVideoList.isEmpty()){
-                    tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
-                    combinedTribalData.setTribalVideoList(tribalVideoList);
-                }
-                combinedTribalDataList.add(combinedTribalData);
-            }
-        }
-        return new ResponseEntity<>(combinedTribalDataList,HttpStatus.OK);
+    public ResponseEntity<StreamingResponseBody> getEnglishDetails(String commonId, String engId) {
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new StreamingResponseBody() {
+                    @Override
+                    public void writeTo(OutputStream outputStream) throws IOException {
+                        List<TribalEnglish> tribalEnglishList = tribalEnglishRepo.findBytribEngUid(engId);
+                        if (!tribalEnglishList.isEmpty()){
+                            for (TribalEnglish tribalEnglish : tribalEnglishList){
+                                CombinedTribalData combinedTribalData = new CombinedTribalData();
+                                combinedTribalData.setTitle(tribalEnglish.getTitle());
+                                combinedTribalData.setDescription(tribalEnglish.getDescription());
+                                combinedTribalData.setUniqueId(tribalEnglish.getTribEngUid());
+                                Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
+                                if (tribalCommonIdOptional.isPresent()){
+                                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
+                                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
+                                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
+                                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
+                                }
+                                List<TribalVideo> tribalVideoList = tribalVideoRepo.findBycommonId(commonId);
+                                if (!tribalVideoList.isEmpty()){
+                                    tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
+                                    for (TribalVideo tribalVideo : tribalVideoList){
+                                        File file = new File(tribalVideo.getFileName());
+                                        FileInputStream fileInputStream = new FileInputStream(file);
+                                        byte[] buffer = new  byte[1024];
+                                        int bytesRead;
+                                        while ((bytesRead = fileInputStream.read(buffer))!=-1){
+                                            outputStream.write(buffer,0,bytesRead);
+                                        }
+                                        fileInputStream.close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
     }
+
+//    public ResponseEntity<List<CombinedTribalData>> getEnglishDetails(String commonId, String engId) {
+//        List<CombinedTribalData>combinedTribalDataList=new ArrayList<>();
+//        List<TribalEnglish>tribalEnglishOptional=tribalEnglishRepo.findBytribEngUid(engId);
+//        if (!tribalEnglishOptional.isEmpty()){
+//            for (TribalEnglish tribalEnglish:tribalEnglishOptional){
+//                CombinedTribalData combinedTribalData =new CombinedTribalData();
+//                combinedTribalData.setTitle(tribalEnglish.getTitle());
+//                combinedTribalData.setDescription(tribalEnglish.getDescription());
+//                combinedTribalData.setUniqueId(tribalEnglish.getTribEngUid());
+//                Optional<TribalCommonId>tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
+//                if (tribalCommonIdOptional.isPresent()){
+//                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
+//                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
+//                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
+//                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
+//                }
+//                List<TribalVideo>tribalVideoList=tribalVideoRepo.findBycommonId(commonId);
+//                if (!tribalVideoList.isEmpty()){
+//                    tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
+//                    combinedTribalData.setTribalVideoList(tribalVideoList);
+//                }
+//                combinedTribalDataList.add(combinedTribalData);
+//            }
+//        }
+//        return new ResponseEntity<>(combinedTribalDataList,HttpStatus.OK);
+//    }
 
 
     public ResponseEntity<List<CombinedTribalData>> getDetailsByLanguage(Integer dType) {
@@ -392,7 +441,6 @@ public class TribalService {
             return new ResponseEntity<>("Video is deleted successfully",HttpStatus.OK);
         }return new ResponseEntity<>("Video isn't deleted",HttpStatus.BAD_REQUEST);
     }
-
 
 
 }

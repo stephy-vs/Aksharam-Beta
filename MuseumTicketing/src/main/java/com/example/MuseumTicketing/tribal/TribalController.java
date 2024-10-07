@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,14 +94,14 @@ public class TribalController {
     }
 
     @GetMapping(path = "/getDetails")
-    public ResponseEntity<List<CombinedTribalData>>getDetailsByCommonId(@RequestParam String commonId,@RequestParam Integer dType){
-        try{
-            Optional<TribalCommonId>tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
+    public ResponseEntity<StreamingResponseBody> getDetailsByCommonId(@RequestBody String commonId,@RequestParam Integer dType){
+        try {
+            Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
             if (tribalCommonIdOptional.isPresent()){
                 TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
                 String malId = tribalCommonId.getMalayalamId();
                 String engId = tribalCommonId.getEnglishId();
-                Optional<DataType>dataTypeOptional=dataTypeRepo.findById(dType);
+                Optional<DataType> dataTypeOptional = dataTypeRepo.findById(dType);
                 if (dataTypeOptional.isPresent()){
                     DataType dataType = dataTypeOptional.get();
                     String type = dataType.getTalk();
@@ -109,13 +110,36 @@ public class TribalController {
                     } else if ("English".equalsIgnoreCase(type)) {
                         return tribalService.getEnglishDetails(commonId,engId);
                     }
-                }return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
-            }return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+                }
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
-        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
     }
+//    public ResponseEntity<List<CombinedTribalData>>getDetailsByCommonId(@RequestParam String commonId,@RequestParam Integer dType){
+//        try{
+//            Optional<TribalCommonId>tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
+//            if (tribalCommonIdOptional.isPresent()){
+//                TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
+//                String malId = tribalCommonId.getMalayalamId();
+//                String engId = tribalCommonId.getEnglishId();
+//                Optional<DataType>dataTypeOptional=dataTypeRepo.findById(dType);
+//                if (dataTypeOptional.isPresent()){
+//                    DataType dataType = dataTypeOptional.get();
+//                    String type = dataType.getTalk();
+//                    if ("Malayalam".equalsIgnoreCase(type)){
+//                        return tribalService.getMalayalamDetails(commonId,malId);
+//                    } else if ("English".equalsIgnoreCase(type)) {
+//                        return tribalService.getEnglishDetails(commonId,engId);
+//                    }
+//                }return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+//            }return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     @GetMapping(path = "getDetailsByDataType")
     public ResponseEntity<List<CombinedTribalData>>getAllDetailsByLanguage(@RequestParam Integer dType){
