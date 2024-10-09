@@ -90,7 +90,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -123,7 +123,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -167,7 +167,7 @@ public class MediaTypeService {
             String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
             //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
             // Use the S3Service's uploadLargeFile method to upload the file
-            s3Service.uploadLargeFile(fileName, fileObj);
+            //s3Service.uploadLargeFile(fileName, fileObj);
             fileObj.delete();
             //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
             // Retrieve the file URL from S3
@@ -175,7 +175,7 @@ public class MediaTypeService {
 
             String thumbnailFileName = System.currentTimeMillis() + "_thumbnail_" + thumbnailFile.getOriginalFilename();
             File thumbnailObj = convertMultiPartFileToFile(thumbnailFile);
-            s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
+            //s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
             thumbnailObj.delete();
             String thumbnailUrl = s3Service.getFileUrl(thumbnailFileName);
 
@@ -207,7 +207,7 @@ public class MediaTypeService {
         File fileObj = convertMultiPartFileToFile(file);
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         // Retrieve the file URL from S3
         String fileUrl = s3Service.getFileUrl(fileName);
@@ -223,7 +223,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -275,7 +275,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -319,14 +319,14 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
         String fileUrl = s3Service.getFileUrl(fileName);
         String thumbnailFileName = System.currentTimeMillis() + "_thumbnail_" + thumbnailFile.getOriginalFilename();
         File thumbnailObj = convertMultiPartFileToFile(thumbnailFile);
-        s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
+        //s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
         thumbnailObj.delete();
         String thumbnailUrl = s3Service.getFileUrl(thumbnailFileName);
 
@@ -365,7 +365,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -389,7 +389,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -422,7 +422,7 @@ public class MediaTypeService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -430,7 +430,7 @@ public class MediaTypeService {
 
         String thumbnailFileName = System.currentTimeMillis() + "_thumbnail_" + thumbnailFile.getOriginalFilename();
         File thumbnailObj = convertMultiPartFileToFile(thumbnailFile);
-        s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
+        //s3Service.uploadLargeFile(thumbnailFileName, thumbnailObj);
         thumbnailObj.delete();
         String thumbnailUrl = s3Service.getFileUrl(thumbnailFileName);
 

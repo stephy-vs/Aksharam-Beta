@@ -121,7 +121,7 @@ public class MainUpdateService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -143,7 +143,7 @@ public class MainUpdateService {
         String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+        //s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3
@@ -165,7 +165,7 @@ public class MainUpdateService {
         String fileName =System.currentTimeMillis()+"_"+files.getOriginalFilename();
         //s3Client.putObject(new PutObjectRequest(bucketName,fileName,fileObj));
         // Use the S3Service's uploadLargeFile method to upload the file
-        s3Service.uploadLargeFile(fileName, fileObj);
+       // s3Service.uploadLargeFile(fileName, fileObj);
         fileObj.delete();
         //String fileUrl = s3Client.getUrl(bucketName,fileName).toString();
         // Retrieve the file URL from S3

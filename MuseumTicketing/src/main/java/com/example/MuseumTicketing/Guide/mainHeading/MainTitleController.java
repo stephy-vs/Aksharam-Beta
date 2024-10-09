@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,9 +71,9 @@ public class MainTitleController {
                 DataType dataType = dataTypeOptional.get();
                 String tData = dataType.getTalk();
                 if (tData != null && "English".equalsIgnoreCase(tData)){
-                    return mainTitleService.getCombinedList();
+                    return mainTitleService.getMainEnglishCombinedList();
                 } else if (tData != null && "Malayalam".equalsIgnoreCase(tData)) {
-                    return mainTitleService.getCombinedListMal();
+                    return mainTitleService.getMainCombinedListMal();
                 }else {
                     return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
                 }
@@ -85,6 +86,7 @@ public class MainTitleController {
         }
         return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
     @GetMapping(path = "/getMainId")
     public ResponseEntity<List<CombinedData>>getAllMainTitleData(@RequestParam Integer dtId, @RequestParam String mainId){
