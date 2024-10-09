@@ -9,8 +9,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +37,7 @@ public class S3Service {
                 .build();
     }
 
-    public void uploadLargeFile(String keyName, File file) throws IOException {
+    public void uploadLargeFile(String keyName, InputStream inputStream,long contentLength) throws IOException {
         long partSize = 5 * 1024 * 1024; // Set part size to 5 MB
 
         // Step 1: Initialize Multipart Upload
@@ -50,12 +52,13 @@ public class S3Service {
         // Step 2: Upload Parts
         List<CompletedPart> completedParts = new ArrayList<>();
         byte[] buffer = new byte[(int) partSize];
+        int bytesRead;
+        int partNumber = 1;
 
-        try (var fis = Files.newInputStream(file.toPath())) {
-            int bytesRead;
-            int partNumber = 1;
 
-            while ((bytesRead = fis.read(buffer)) != -1) {
+        try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
+
+            while ((bytesRead = bis.read(buffer)) != -1) {
                 UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
                         .bucket(bucketName)
                         .key(keyName)
@@ -64,9 +67,9 @@ public class S3Service {
                         .contentLength((long) bytesRead)
                         .build();
 
-                //UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadPartRequest, RequestBody.fromBytes(buffer, 0, bytesRead));
-                byte[] exactBytes = Arrays.copyOfRange(buffer, 0, bytesRead);
-                UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadPartRequest, RequestBody.fromBytes(exactBytes));
+                UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadPartRequest, RequestBody.fromBytes(Arrays.copyOf(buffer,bytesRead)));
+//                byte[] exactBytes = Arrays.copyOfRange(buffer, 0, bytesRead);
+//                UploadPartResponse uploadPartResponse = s3Client.uploadPart(uploadPartRequest, RequestBody.fromBytes(exactBytes));
 
                 completedParts.add(CompletedPart.builder()
                         .partNumber(partNumber)

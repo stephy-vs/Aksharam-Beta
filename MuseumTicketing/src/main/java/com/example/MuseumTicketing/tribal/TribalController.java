@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,9 @@ public class TribalController {
     }
 
     @GetMapping(path = "/getDetails")
-    public ResponseEntity<StreamingResponseBody> getDetailsByCommonId(@RequestBody String commonId,@RequestParam Integer dType){
+    public ResponseEntity<List<CombinedTribalData>> getDetailsByCommonId(@RequestParam String commonId,@RequestParam Integer dType,
+                                                                         @RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "10") int size){
         try {
             Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
             if (tribalCommonIdOptional.isPresent()){
@@ -106,16 +109,17 @@ public class TribalController {
                     DataType dataType = dataTypeOptional.get();
                     String type = dataType.getTalk();
                     if ("Malayalam".equalsIgnoreCase(type)){
-                        return tribalService.getMalayalamDetails(commonId,malId);
+                        return tribalService.getMalayalamDetails(commonId,malId,page,size);
                     } else if ("English".equalsIgnoreCase(type)) {
-                        return tribalService.getEnglishDetails(commonId,engId);
+                        return  tribalService.getEnglishDetails(commonId,engId,page,size);
                     }
                 }
+                return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
             }
         }catch (Exception e){
             e.printStackTrace();
         }
-        return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 //    public ResponseEntity<List<CombinedTribalData>>getDetailsByCommonId(@RequestParam String commonId,@RequestParam Integer dType){
 //        try{
@@ -181,8 +185,8 @@ public class TribalController {
         try {
             Optional<TribalVideo>tribalVideoOptional=tribalVideoRepo.findByCommonIdAndId(commonId,tId);
             if (tribalVideoOptional.isPresent()){
-                TribalVideo tribalVideo = tribalService.updateTribalVideo(commonId,tId,file);
-                return new ResponseEntity<>(tribalVideo,HttpStatus.OK);
+//                TribalVideo tribalVideo = tribalService.updateTribalVideo(commonId,tId,file);
+//                return new ResponseEntity<>(tribalVideo,HttpStatus.OK);
             }return new ResponseEntity<>("Enter a valid commonId and id",HttpStatus.BAD_REQUEST);
         }catch (Exception e){
             return errorService.handlerException(e);

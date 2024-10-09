@@ -4,6 +4,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.example.MuseumTicketing.Guide.Language.DataType;
 import com.example.MuseumTicketing.Guide.Language.DataTypeRepo;
 import com.example.MuseumTicketing.Guide.util.AlphaNumeric;
@@ -21,6 +22,9 @@ import com.example.MuseumTicketing.tribal.tribalVideo.TribalVideoRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -123,10 +127,10 @@ public class TribalService {
     }
 
     private TribalVideoDto uploadTribalVideo(MultipartFile files, String commonId, String malId, String engId) throws IOException{
-        File fileObj = convertMultiPartFileToFile(files);
+        //File fileObj = convertMultiPartFileToFile(files);
         String fileName =System.currentTimeMillis()+"_"+files.getOriginalFilename();
-        s3Service.uploadLargeFile(fileName, fileObj);
-        fileObj.delete();
+        s3Service.uploadLargeFile(fileName, files.getInputStream(),files.getSize());
+        //fileObj.delete();
         String fileUrl = s3Service.getFileUrl(fileName);
         TribalVideo tribalVideo = new TribalVideo(fileName,fileUrl,commonId);
         tribalVideo.setEnglishId(engId);
@@ -135,82 +139,30 @@ public class TribalService {
         return new TribalVideoDto(fileName,fileUrl,commonId,malId,engId);
     }
 
-    public ResponseEntity<StreamingResponseBody> getMalayalamDetails(String commonId, String malId) {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new StreamingResponseBody() {
-                    @Override
-                    public void writeTo(OutputStream outputStream) throws IOException {
-                        List<TribalMalayalam> tribalMalayalamList =tribalMalayalamRepo.findBytribMalUid(malId);
-                        if (!tribalMalayalamList.isEmpty()){
-                            for (TribalMalayalam tribalMalayalam : tribalMalayalamList){
-                                CombinedTribalData combinedTribalData = new CombinedTribalData();
-                                combinedTribalData.setTitle(tribalMalayalam.getTitle());
-                                combinedTribalData.setDescription(tribalMalayalam.getDescription());
-                                combinedTribalData.setUniqueId(tribalMalayalam.getTribMalUid());
-                                Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
-                                if (tribalCommonIdOptional.isPresent()){
-                                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
-                                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
-                                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
-                                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
-                                }
-                                List<TribalVideo> tribalVideoList = tribalVideoRepo.findBycommonId(commonId);
-                                tribalVideoList.sort(Comparator.comparing(TribalVideo ::getId));
-                                if (!tribalVideoList.isEmpty()){
-                                    for (TribalVideo tribalVideo : tribalVideoList){
-                                        File file = new File(tribalVideo.getFileName());
-                                        FileInputStream fileInputStream = new FileInputStream(file);
-                                        byte[] buffer = new byte[1024];
-                                        int bytesRead;
-                                        while ((bytesRead = fileInputStream.read(buffer))!=-1){
-                                            outputStream.write(buffer,0,bytesRead);
-                                        }
-                                        fileInputStream.close();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-    }
-
-    public ResponseEntity<StreamingResponseBody> getEnglishDetails(String commonId, String engId) {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new StreamingResponseBody() {
-                    @Override
-                    public void writeTo(OutputStream outputStream) throws IOException {
-                        List<TribalEnglish> tribalEnglishList = tribalEnglishRepo.findBytribEngUid(engId);
-                        if (!tribalEnglishList.isEmpty()){
-                            for (TribalEnglish tribalEnglish : tribalEnglishList){
-                                CombinedTribalData combinedTribalData = new CombinedTribalData();
-                                combinedTribalData.setTitle(tribalEnglish.getTitle());
-                                combinedTribalData.setDescription(tribalEnglish.getDescription());
-                                combinedTribalData.setUniqueId(tribalEnglish.getTribEngUid());
-                                Optional<TribalCommonId> tribalCommonIdOptional = tribalCommonIdRepo.findByCommonId(commonId);
-                                if (tribalCommonIdOptional.isPresent()){
-                                    TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
-                                    combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
-                                    combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
-                                    combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
-                                }
-                                List<TribalVideo> tribalVideoList = tribalVideoRepo.findBycommonId(commonId);
-                                if (!tribalVideoList.isEmpty()){
-                                    tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
-                                    for (TribalVideo tribalVideo : tribalVideoList){
-                                        File file = new File(tribalVideo.getFileName());
-                                        FileInputStream fileInputStream = new FileInputStream(file);
-                                        byte[] buffer = new  byte[1024];
-                                        int bytesRead;
-                                        while ((bytesRead = fileInputStream.read(buffer))!=-1){
-                                            outputStream.write(buffer,0,bytesRead);
-                                        }
-                                        fileInputStream.close();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
+    public ResponseEntity<List<CombinedTribalData>> getMalayalamDetails(String commonId, String malId, int page, int size) {
+        List<CombinedTribalData> combinedTribalDataList = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page,size);
+        Page<TribalMalayalam> tribalMalayalamPage = tribalMalayalamRepo.findByTribMalUid(malId,pageable);
+        for (TribalMalayalam tribalMalayalam :  tribalMalayalamPage){
+            CombinedTribalData combinedTribalData = new CombinedTribalData();
+            combinedTribalData.setTitle(tribalMalayalam.getTitle());
+            combinedTribalData.setDescription(tribalMalayalam.getDescription());
+            combinedTribalData.setUniqueId(tribalMalayalam.getTribMalUid());
+            Optional<TribalCommonId> tribalCommonIdOptional=tribalCommonIdRepo.findByCommonId(commonId);
+            if (tribalCommonIdOptional.isPresent()){
+                TribalCommonId tribalCommonId = tribalCommonIdOptional.get();
+                combinedTribalData.setMalayalamId(tribalCommonId.getMalayalamId());
+                combinedTribalData.setEnglishId(tribalCommonId.getEnglishId());
+                combinedTribalData.setTribalCommonId(tribalCommonId.getCommonId());
+            }
+            List<TribalVideo> tribalVideoList = tribalVideoRepo.findBycommonId(commonId);
+            if (!tribalVideoList.isEmpty()){
+                tribalVideoList.sort(Comparator.comparing(TribalVideo::getId));
+                combinedTribalData.setTribalVideoList(tribalVideoList);
+            }
+            combinedTribalDataList.add(combinedTribalData);
+        }
+        return new ResponseEntity<>(combinedTribalDataList,HttpStatus.OK);
     }
 
 //    public ResponseEntity<List<CombinedTribalData>> getEnglishDetails(String commonId, String engId) {
@@ -358,23 +310,23 @@ public class TribalService {
         return new ResponseEntity<>("UniqueId isn't valid",HttpStatus.NOT_FOUND);
     }
 
-    public TribalVideo updateTribalVideo(String commonId, Integer tId, MultipartFile file) throws IOException{
-        File fileObj = convertMultiPartFileToFile(file);
-        String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
-        s3Service.uploadLargeFile(fileName, fileObj);
-        fileObj.delete();
-        String fileUrl = s3Service.getFileUrl(fileName);
-        Optional<TribalVideo>tribalVideoOptional=tribalVideoRepo.findByCommonIdAndId(commonId,tId);
-        if (tribalVideoOptional.isPresent()){
-            TribalVideo tribalVideo = tribalVideoOptional.get();
-            tribalVideo.setFileUrl(fileUrl);
-            tribalVideo.setFileName(fileName);
-            tribalVideoRepo.save(tribalVideo);
-            return tribalVideo;
-        }else {
-            return null;
-        }
-    }
+//    public TribalVideo updateTribalVideo(String commonId, Integer tId, MultipartFile file) throws IOException{
+//        File fileObj = convertMultiPartFileToFile(file);
+//        String fileName =System.currentTimeMillis()+"_"+file.getOriginalFilename();
+//        s3Service.uploadLargeFile(fileName, fileObj);
+//        fileObj.delete();
+//        String fileUrl = s3Service.getFileUrl(fileName);
+//        Optional<TribalVideo>tribalVideoOptional=tribalVideoRepo.findByCommonIdAndId(commonId,tId);
+//        if (tribalVideoOptional.isPresent()){
+//            TribalVideo tribalVideo = tribalVideoOptional.get();
+//            tribalVideo.setFileUrl(fileUrl);
+//            tribalVideo.setFileName(fileName);
+//            tribalVideoRepo.save(tribalVideo);
+//            return tribalVideo;
+//        }else {
+//            return null;
+//        }
+//    }
 
     @Transactional
     public ResponseEntity<?> deleteDataByCommonId(String commonId, String malId, String engId) {
@@ -442,5 +394,7 @@ public class TribalService {
         }return new ResponseEntity<>("Video isn't deleted",HttpStatus.BAD_REQUEST);
     }
 
-
+    public ResponseEntity<List<CombinedTribalData>> getEnglishDetails(String commonId, String engId, int page, int size) {
+        return null;
+    }
 }
