@@ -71,9 +71,9 @@ public class MainTitleController {
                 DataType dataType = dataTypeOptional.get();
                 String tData = dataType.getTalk();
                 if (tData != null && "English".equalsIgnoreCase(tData)){
-                    return mainTitleService.getMainEnglishCombinedList();
+                    return mainTitleService.getCombinedList();
                 } else if (tData != null && "Malayalam".equalsIgnoreCase(tData)) {
-                    return mainTitleService.getMainCombinedListMal();
+                    return mainTitleService.getCombinedListMal();
                 }else {
                     return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
                 }
