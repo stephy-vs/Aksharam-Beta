@@ -195,140 +195,155 @@ public class MainTitleService {
         //return new ResponseEntity<>("Something went wrong",HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<List<CombinedData>> getMainEnglishCombinedList() {
-        List<CombinedData> combinedDataList = new ArrayList<>();
-        List<MainTitleEng> mainTitleEngs = mtEngRepo.findAll();
-        mainTitleEngs.sort(Comparator.comparing(MainTitleEng::getMEngId));
-        for (MainTitleEng mainTitleEng : mainTitleEngs){
-            CombinedData combinedData = new CombinedData();
-            combinedData.setTitle(mainTitleEng.getTitle());
-            combinedData.setDescription(mainTitleEng.getDescription());
-            combinedData.setReferenceUrl(mainTitleEng.getRef());
-            combinedData.setuId(mainTitleEng.getMEngUid());
-
-            List<BackgroundImg> backgroundImgList = backgroundImgRepo.findByengId(mainTitleEng.getMEngUid());
-            if (!backgroundImgList.isEmpty()){
-                combinedData.setBackgroundImgList(backgroundImgList);
-            }
-            combinedDataList.add(combinedData);
-        }
-        return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
-    }
-
-    public ResponseEntity<List<CombinedData>> getMainCombinedListMal() {
-        List<CombinedData> combinedDataList = new ArrayList<>();
-        List<MainTitleMal> mainTitleMals = mtMalRepo.findAll();
-        mainTitleMals.sort(Comparator.comparing(MainTitleMal::getMMalId));
-        for (MainTitleMal mainTitleMal : mainTitleMals){
-            CombinedData combinedData = new CombinedData();
-            combinedData.setTitle(mainTitleMal.getTitle());
-            combinedData.setDescription(mainTitleMal.getDescription());
-            combinedData.setReferenceUrl(mainTitleMal.getRef());
-            combinedData.setuId(mainTitleMal.getMMalUid());
-
-            List<BackgroundImg> backgroundImgList = backgroundImgRepo.findByengId(mainTitleMal.getMMalUid());
-            if (!backgroundImgList.isEmpty()){
-                combinedData.setBackgroundImgList(backgroundImgList);
-            }
-            combinedDataList.add(combinedData);
-        }
-        return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
-    }
-
-//    public ResponseEntity<List<CombinedData>> getCombinedList() {
-//        try {
-//            List<CombinedData> combinedData = new ArrayList<>();
-//            List<MainTitleEng> mainTitleEngs = mtEngRepo.findAll();
-//
-//            mainTitleEngs.sort(Comparator.comparing(MainTitleEng::getMEngId));
-//
-//            for (MainTitleEng mainTitleEng : mainTitleEngs){
-//                CombinedData combinedData1 = new CombinedData();
-//                combinedData1.setTitle(mainTitleEng.getTitle());
-//                combinedData1.setDescription(mainTitleEng.getDescription());
-//                combinedData1.setReferenceUrl(mainTitleEng.getRef());
-//                combinedData1.setuId(mainTitleEng.getMEngUid());
-//
-//                Optional<CommonIdQRCode> commonIdQRCode = commonIdQRCodeRepo.findByEngId(mainTitleEng.getMEngUid());
-//                if (commonIdQRCode.isPresent()) {
-//                    combinedData1.setCommonId(commonIdQRCode.get().getCommonId());
-//                    combinedData1.setQrCodeUrl(commonIdQRCode.get().getQrCodeUrl());
-//                    combinedData1.setEngId(commonIdQRCode.get().getEngId());
-//                    combinedData1.setMalId(commonIdQRCode.get().getMalId());
-//                    combinedData1.setQrCodeImage(commonIdQRCode.get().getQrCodeImage());
-//                }
-//
-//                List<ImgData> imgData =imgRepo.findByengId(mainTitleEng.getMEngUid());
-//                imgData.sort(Comparator.comparing(ImgData::getImgID));
-//                combinedData1.setImgDataList(imgData);
-//
-//                List<BackgroundImg> backgroundImgs = backgroundImgRepo.findByengId(mainTitleEng.getMEngUid());
-//                combinedData1.setBackgroundImgList(backgroundImgs);
-//
-//                List<Mp3Data> mp3Data = mp3Repo.findBydtId(mainTitleEng.getMEngUid());
-//                mp3Data.sort(Comparator.comparing(Mp3Data::getId));
-//                combinedData1.setMp3DataList(mp3Data);
-//
-//                List<Mp4Data> mp4Data = mp4DataRepo.findByengId(mainTitleEng.getMEngUid());
-//                mp4Data.sort(Comparator.comparing((Mp4Data::getId)));
-//                combinedData1.setMp4DataList(mp4Data);
-//
-//                combinedData.add(combinedData1);
+//    public ResponseEntity<List<CombinedData>> getMainEnglishCombinedList() {
+//        List<CombinedData> combinedDataList = new ArrayList<>();
+//        List<MainTitleEng> mainTitleEngs = mtEngRepo.findAll();
+//        mainTitleEngs.sort(Comparator.comparing(MainTitleEng::getMEngId));
+//        for (MainTitleEng mainTitleEng : mainTitleEngs){
+//            CombinedData combinedData = new CombinedData();
+//            combinedData.setTitle(mainTitleEng.getTitle());
+//            combinedData.setDescription(mainTitleEng.getDescription());
+//            combinedData.setReferenceUrl(mainTitleEng.getRef());
+//            combinedData.setuId(mainTitleEng.getMEngUid());
+//            Optional<CommonIdQRCode> commonIdQRCodeOptional = commonIdQRCodeRepo.findByCommonId(mainTitleEng.getMEngUid());
+//            if (commonIdQRCodeOptional.isPresent()){
+//                CommonIdQRCode commonIdQRCode = commonIdQRCodeOptional.get();
+//                combinedData.setCommonId(commonIdQRCode.getCommonId());
+//                combinedData.setMalId(commonIdQRCode.getMalId());
+//                combinedData.setEngId(commonIdQRCode.getEngId());
 //            }
-//            return new ResponseEntity<>(combinedData,HttpStatus.OK);
-//        }catch (Exception e){
-//            e.printStackTrace();
+//
+//            List<BackgroundImg> backgroundImgList = backgroundImgRepo.findByengId(mainTitleEng.getMEngUid());
+//            if (!backgroundImgList.isEmpty()){
+//                combinedData.setBackgroundImgList(backgroundImgList);
+//            }
+//            combinedDataList.add(combinedData);
 //        }
-//        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+//        return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
 //    }
 
-//    public ResponseEntity<List<CombinedData>> getCombinedListMal() {
-//        try {
-//            List<CombinedData> combinedDataList = new ArrayList<>();
-//            List<MainTitleMal> mainTitleMals = mtMalRepo.findAll();
+//    public ResponseEntity<List<CombinedData>> getMainCombinedListMal() {
+//        List<CombinedData> combinedDataList = new ArrayList<>();
+//        List<MainTitleMal> mainTitleMals = mtMalRepo.findAll();
+//        mainTitleMals.sort(Comparator.comparing(MainTitleMal::getMMalId));
+//        for (MainTitleMal mainTitleMal : mainTitleMals){
+//            CombinedData combinedData = new CombinedData();
+//            combinedData.setTitle(mainTitleMal.getTitle());
+//            combinedData.setDescription(mainTitleMal.getDescription());
+//            combinedData.setReferenceUrl(mainTitleMal.getRef());
+//            combinedData.setuId(mainTitleMal.getMMalUid());
 //
-//            mainTitleMals.sort(Comparator.comparing(MainTitleMal::getMMalId));
-//
-//            for (MainTitleMal mainTitleMal : mainTitleMals){
-//                CombinedData combinedData = new CombinedData();
-//                combinedData.setTitle(mainTitleMal.getTitle());
-//                combinedData.setDescription(mainTitleMal.getDescription());
-//                combinedData.setReferenceUrl(mainTitleMal.getRef());
-//                combinedData.setuId(mainTitleMal.getMMalUid());
-//
-//                Optional<CommonIdQRCode> commonIdQRCode = commonIdQRCodeRepo.findByMalId(mainTitleMal.getMMalUid());
-//                if (commonIdQRCode.isPresent()) {
-//                    combinedData.setCommonId(commonIdQRCode.get().getCommonId());
-//                    combinedData.setQrCodeUrl(commonIdQRCode.get().getQrCodeUrl());
-//                    combinedData.setEngId(commonIdQRCode.get().getEngId());
-//                    combinedData.setMalId(commonIdQRCode.get().getMalId());
-//                    combinedData.setQrCodeImage(commonIdQRCode.get().getQrCodeImage());
-//                }
-//
-//                List<ImgData> imgData =imgRepo.findBymalId(mainTitleMal.getMMalUid());
-//                imgData.sort(Comparator.comparing(ImgData::getImgID));
-//                combinedData.setImgDataList(imgData);
-//
-//                List<BackgroundImg> backgroundImgs = backgroundImgRepo.findBymalId(mainTitleMal.getMMalUid());
-//                combinedData.setBackgroundImgList(backgroundImgs);
-//
-//                List<Mp3Data> mp3Data = mp3Repo.findBydtId(mainTitleMal.getMMalUid());
-//                mp3Data.sort(Comparator.comparing(Mp3Data::getId));
-//                combinedData.setMp3DataList(mp3Data);
-//
-//                List<Mp4Data> mp4Data = mp4DataRepo.findByengId(mainTitleMal.getMMalUid());
-//                mp4Data.sort(Comparator.comparing((Mp4Data::getId)));
-//                combinedData.setMp4DataList(mp4Data);
-//
-//                combinedDataList.add(combinedData);
-//
+//            Optional<CommonIdQRCode> commonIdQRCodeOptional = commonIdQRCodeRepo.findByCommonId(mainTitleMal.getMMalUid());
+//            if (commonIdQRCodeOptional.isPresent()){
+//                CommonIdQRCode commonIdQRCode = commonIdQRCodeOptional.get();
+//                combinedData.setEngId(commonIdQRCode.getEngId());
+//                combinedData.setMalId(commonIdQRCode.getMalId());
+//                combinedData.setCommonId(commonIdQRCode.getCommonId());
 //            }
-//            return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
-//        }catch (Exception e){
-//            e.printStackTrace();
+//
+//            List<BackgroundImg> backgroundImgList = backgroundImgRepo.findByengId(mainTitleMal.getMMalUid());
+//            if (!backgroundImgList.isEmpty()){
+//                combinedData.setBackgroundImgList(backgroundImgList);
+//            }
+//            combinedDataList.add(combinedData);
 //        }
-//        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+//        return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
 //    }
+
+    public ResponseEntity<List<CombinedData>> getCombinedList() {
+        try {
+            List<CombinedData> combinedData = new ArrayList<>();
+            List<MainTitleEng> mainTitleEngs = mtEngRepo.findAll();
+
+            mainTitleEngs.sort(Comparator.comparing(MainTitleEng::getMEngId));
+
+            for (MainTitleEng mainTitleEng : mainTitleEngs){
+                CombinedData combinedData1 = new CombinedData();
+                combinedData1.setTitle(mainTitleEng.getTitle());
+                combinedData1.setDescription(mainTitleEng.getDescription());
+                combinedData1.setReferenceUrl(mainTitleEng.getRef());
+                combinedData1.setuId(mainTitleEng.getMEngUid());
+
+                Optional<CommonIdQRCode> commonIdQRCode = commonIdQRCodeRepo.findByEngId(mainTitleEng.getMEngUid());
+                if (commonIdQRCode.isPresent()) {
+                    combinedData1.setCommonId(commonIdQRCode.get().getCommonId());
+                    combinedData1.setQrCodeUrl(commonIdQRCode.get().getQrCodeUrl());
+                    combinedData1.setEngId(commonIdQRCode.get().getEngId());
+                    combinedData1.setMalId(commonIdQRCode.get().getMalId());
+                    combinedData1.setQrCodeImage(commonIdQRCode.get().getQrCodeImage());
+                }
+
+                List<ImgData> imgData =imgRepo.findByengId(mainTitleEng.getMEngUid());
+                imgData.sort(Comparator.comparing(ImgData::getImgID));
+                combinedData1.setImgDataList(imgData);
+
+                List<BackgroundImg> backgroundImgs = backgroundImgRepo.findByengId(mainTitleEng.getMEngUid());
+                combinedData1.setBackgroundImgList(backgroundImgs);
+
+                List<Mp3Data> mp3Data = mp3Repo.findBydtId(mainTitleEng.getMEngUid());
+                mp3Data.sort(Comparator.comparing(Mp3Data::getId));
+                combinedData1.setMp3DataList(mp3Data);
+
+                List<Mp4Data> mp4Data = mp4DataRepo.findByengId(mainTitleEng.getMEngUid());
+                mp4Data.sort(Comparator.comparing((Mp4Data::getId)));
+                combinedData1.setMp4DataList(mp4Data);
+
+                combinedData.add(combinedData1);
+            }
+            return new ResponseEntity<>(combinedData,HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public ResponseEntity<List<CombinedData>> getCombinedListMal() {
+        try {
+            List<CombinedData> combinedDataList = new ArrayList<>();
+            List<MainTitleMal> mainTitleMals = mtMalRepo.findAll();
+
+            mainTitleMals.sort(Comparator.comparing(MainTitleMal::getMMalId));
+
+            for (MainTitleMal mainTitleMal : mainTitleMals){
+                CombinedData combinedData = new CombinedData();
+                combinedData.setTitle(mainTitleMal.getTitle());
+                combinedData.setDescription(mainTitleMal.getDescription());
+                combinedData.setReferenceUrl(mainTitleMal.getRef());
+                combinedData.setuId(mainTitleMal.getMMalUid());
+
+                Optional<CommonIdQRCode> commonIdQRCode = commonIdQRCodeRepo.findByMalId(mainTitleMal.getMMalUid());
+                if (commonIdQRCode.isPresent()) {
+                    combinedData.setCommonId(commonIdQRCode.get().getCommonId());
+                    combinedData.setQrCodeUrl(commonIdQRCode.get().getQrCodeUrl());
+                    combinedData.setEngId(commonIdQRCode.get().getEngId());
+                    combinedData.setMalId(commonIdQRCode.get().getMalId());
+                    combinedData.setQrCodeImage(commonIdQRCode.get().getQrCodeImage());
+                }
+
+                List<ImgData> imgData =imgRepo.findBymalId(mainTitleMal.getMMalUid());
+                imgData.sort(Comparator.comparing(ImgData::getImgID));
+                combinedData.setImgDataList(imgData);
+
+                List<BackgroundImg> backgroundImgs = backgroundImgRepo.findBymalId(mainTitleMal.getMMalUid());
+                combinedData.setBackgroundImgList(backgroundImgs);
+
+                List<Mp3Data> mp3Data = mp3Repo.findBydtId(mainTitleMal.getMMalUid());
+                mp3Data.sort(Comparator.comparing(Mp3Data::getId));
+                combinedData.setMp3DataList(mp3Data);
+
+                List<Mp4Data> mp4Data = mp4DataRepo.findByengId(mainTitleMal.getMMalUid());
+                mp4Data.sort(Comparator.comparing((Mp4Data::getId)));
+                combinedData.setMp4DataList(mp4Data);
+
+                combinedDataList.add(combinedData);
+
+            }
+            return new ResponseEntity<>(combinedDataList,HttpStatus.OK);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     public ResponseEntity<List<CombinedData>> getCombinedList(String mainId) {
         try {
