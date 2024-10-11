@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
+@CrossOrigin
 @RequestMapping(path = "file/Video")
 public class LocalUploadController {
     @Autowired

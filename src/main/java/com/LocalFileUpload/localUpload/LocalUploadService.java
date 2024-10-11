@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -69,32 +70,39 @@ public class LocalUploadService {
             final  long finalStart = start;
             final long finalEnd = end;
             long contentLength = finalEnd-finalStart+1;
+            String mimeType = Files.probeContentType(filePath);
+            if (mimeType == null) {
+                mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE; // Fallback to binary if unknown
+            }
+
             HttpHeaders headers = new HttpHeaders();//
-            headers.add(HttpHeaders.CONTENT_TYPE,MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            headers.add(HttpHeaders.CONTENT_LENGTH,String.valueOf(contentLength));
-            headers.add(HttpHeaders.CONTENT_RANGE,"bytes "+start + "_"+end + "/" + fileLength);
+            headers.add(HttpHeaders.CONTENT_TYPE, mimeType);
+            headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+            headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
             headers.add(HttpHeaders.ACCEPT_RANGES, "bytes");
             StreamingResponseBody responseBody = outputStream -> {
-                try (InputStream inputStream = resource.getInputStream()){
+                try (InputStream inputStream = resource.getInputStream()) {
                     inputStream.skip(finalStart);
                     byte[] buffer = new byte[1024];
-                    long byteRead;
-                    long totalBytesRead =0;
+                    long bytesRead;
+                    long totalBytesRead = 0;
 
-                    while ((byteRead = inputStream.read(buffer)) != -1 && totalBytesRead < contentLength){
-                        outputStream.write(buffer,0,(int)  Math.min(byteRead,contentLength-totalBytesRead));
-                        totalBytesRead += byteRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1 && totalBytesRead < contentLength) {
+                        outputStream.write(buffer, 0, (int) Math.min(bytesRead, contentLength - totalBytesRead));
+                        totalBytesRead += bytesRead;
                     }
-
-                }catch (IOException e){
-                    throw new RuntimeException("Error reading file",e);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error reading file", e);
                 }
             };
+
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).headers(headers).body(responseBody);
-        }catch (IOException e){
+
+        } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
     private String getUploadDir() {
         return uploadDir;
