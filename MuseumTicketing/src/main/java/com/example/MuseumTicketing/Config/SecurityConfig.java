@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/DataEntry2/getFirstSubComplete").permitAll()
                         .requestMatchers("/api/DataEntry2/getAllByCommonId/{id}").permitAll()
                         .requestMatchers("/api/dataType1/getTalk").permitAll()
+                        .requestMatchers("/api/DataEntry1/upload").permitAll()
+                        .requestMatchers("/api/DataEntry1/download/{fileName:.+}").permitAll()
                         .requestMatchers("/api/topicData/getTopic").permitAll()
                         .requestMatchers("/api/DataEntry1/getMainComplete").permitAll()
                         .requestMatchers("/api/DataEntry1/getSubDataByCommonId").permitAll()
